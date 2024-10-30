@@ -2,11 +2,17 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 import time
 
 def get_product_links(url, link_selector):
     """Получает ссылки на продукты со страницы категории."""
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    chrome_options = Options()
+    chrome_options.add_argument("--ignore-certificate-errors")  # Игнорировать ошибки сертификата
+    chrome_options.add_argument("--allow-insecure-localhost")  # Разрешить небезопасные локальные соединения
+    chrome_options.add_argument("--headless")  # Запуск в безголовом режиме (опционально)
+
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     driver.get(url)
     time.sleep(5)  # Ожидание загрузки страницы
 
@@ -18,9 +24,14 @@ def get_product_links(url, link_selector):
 
 def parse_product_details(url, title_selector, price_selector):
     """Получает название и цену продукта по ссылке."""
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    chrome_options = Options()
+    chrome_options.add_argument("--ignore-certificate-errors")  # Игнорировать ошибки сертификата
+    chrome_options.add_argument("--allow-insecure-localhost")  # Разрешить небезопасные локальные соединения
+    chrome_options.add_argument("--headless")  # Запуск в безголовом режиме (опционально)
+
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     driver.get(url)
-    time.sleep(5)  # Ожидание загрузки страницы
+    time.sleep(3)  # Ожидание загрузки страницы
 
     # Получение названия продукта
     title = driver.find_element(By.CSS_SELECTOR, title_selector).text
@@ -35,18 +46,17 @@ def main():
     # Словарь сайтов и их параметров
     sites = {
         'iPhoriya': {
-            'category_url': 'https://iphoriya.ru/product-category/iphone/iphone-15-pro',  # Замените на реальный URL всех моделей
-            'link_selector': 'a.block',  # Селектор для получения ссылок на товары
-            'product_title_selector': 'a[block font-bold leading-snug text-graphite-800 no-underline hover:text-graphite-800 sm:text-center"]',  # Замените на универсальный селектор
-            'product_price_selector': 'shrink-0 text-xl text-graphite-800 font-bold xl:text-lg'  # Замените на универсальный селектор
+            'category_url': 'https://iphoriya.ru/product-category/iphone/iphone-15-pro',
+            'link_selector': 'a.block',
+            'product_title_selector': '.font-bold',  # Исправленный селектор
+            'product_price_selector': '.text-xl'  # Исправленный селектор
         },
-        'Another Site': {
-            'category_url': 'https://www.eldorado.ru/c/smartfony/b/APPLE/',  # Замените на реальный URL
-            'link_selector': '.product-link',  # Селектор для получения ссылок на товары
-            'product_title_selector': '.item-title',  # Селектор для названия
-            'product_price_selector': '.item-price'  # Селектор для цены
+        'Eldorado': {
+            'category_url': 'https://www.eldorado.ru/c/smartfony/b/APPLE/',
+            'link_selector': '.product-title a',  # Селектор для ссылки на продукт
+            'product_title_selector': '.product-title',  # Селектор для названия продукта
+            'product_price_selector': '.product-price'  # Селектор для цены продукта
         }
-        # Добавьте другие сайты по мере необходимости
     }
 
     all_products = {}
@@ -76,6 +86,6 @@ def main():
         for product in products:
             print(f"- Название: {product['title']}, Цена: {product['price']}, Ссылка: {product['link']}")
         print()
-
+        print(products)
 if __name__ == '__main__':
     main()
